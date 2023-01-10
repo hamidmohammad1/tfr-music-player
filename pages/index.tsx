@@ -94,7 +94,7 @@ function Home() {
     }
   }, [soundAccepted])
 
-  if (play) {
+  if (play && soundAccepted) {
     audio.onended = function () {
       window.speechSynthesis.speak(new SpeechSynthesisUtterance(text))
       setPlay(false)
