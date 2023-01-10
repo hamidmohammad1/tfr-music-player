@@ -1,6 +1,5 @@
 import { useState, useEffect } from 'react'
 import durationInSecToTime from '../functions/durationInSecToTime'
-import existsLink from '../functions/existsLink'
 
 type Event = {
   unixTime: number
@@ -38,6 +37,7 @@ function Home() {
   const [audio, setAudio] = useState<any>(null)
   const [play, setPlay] = useState(false)
   const [gifs, setGifs] = useState<string[]>([])
+  const [soundAccepted, setSoundAccepted] = useState(false)
 
   function setDurationInterval() {
     setDuration((oldCount) => oldCount + 1)
@@ -48,6 +48,7 @@ function Home() {
     console.log('Checker nu!: ', Math.round(unixTimeNow / 1000))
 
     const event = await getDatabase()
+    console.log(event)
     setDuration(Math.round((unixTimeNow - event.unixTime * SEC_TO_MS) / 1000))
 
     if (
@@ -59,11 +60,12 @@ function Home() {
 
     const initialsAudio = subUrlMp3 + event.initials + '.mp3?raw=true'
     const defaultAudio = subUrlMp3 + 'Default' + '.mp3?raw=true'
-    const urlMusic = (await existsLink(initialsAudio))
-      ? initialsAudio
-      : defaultAudio
+    const urlMusic = true ? initialsAudio : defaultAudio
 
-    setAudio(new Audio(urlMusic))
+    const audio = new Audio(urlMusic)
+    //audio.crossOrigin = 'anonymous'
+
+    setAudio(audio)
     setText(event.text)
     setGifId(Math.floor(Math.random() * gifs.length))
     setPlay(true)
@@ -90,7 +92,7 @@ function Home() {
       clearInterval(setDurationIntervalId)
       clearInterval(fetchDatabaseIntervalId)
     }
-  }, [])
+  }, [soundAccepted])
 
   if (play) {
     audio.onended = function () {
@@ -102,6 +104,23 @@ function Home() {
     }
 
     audio.play()
+  }
+
+  if (!soundAccepted) {
+    return (
+      <div className='h-[100vh] w-[100vw] flex flex-row justify-center bg-[#286464]'>
+        <div className='flex flex-col justify-center'>
+          <button
+            className='text-5xl text-white bg-yellow-600 p-6 rounded-lg'
+            onClick={() => {
+              setSoundAccepted(true)
+            }}
+          >
+            Acccepter lyd
+          </button>
+        </div>
+      </div>
+    )
   }
 
   return (
