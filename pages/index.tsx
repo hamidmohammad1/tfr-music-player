@@ -1,6 +1,6 @@
 import { useState, useEffect } from 'react'
-import durationInSecToTime from './functions/durationInSecToTime'
-import existsLink from './functions/existsLink'
+import durationInSecToTime from '../functions/durationInSecToTime'
+import existsLink from '../functions/existsLink'
 
 type Event = {
   unixTime: number
@@ -134,15 +134,3 @@ function Home() {
 }
 
 export default Home
-
-//const events: Event = (await res.json()).events.sort((e: Event) => e.unixTime)
-//for (const event of events) {
-//setDuration(Math.max(...events.map((e) => e.unixTime)) * SEC_TO_MS)
-/*
-const unixTimeNow = Date.now()
-const event: Event = {
-  unixTime: Number(unixTimeNow / 1000) - 15,
-  text: 'HYM has approved PROPHET_PK_CONSTANT!',
-  initials: 'HYM',
-} 
-*/
