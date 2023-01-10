@@ -1,0 +1,14 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+body {
+  margin: 0; /* Reset default margin */
+}
+iframe {
+  display: block; /* iframes are inline by default */
+  background: #000;
+  border: none; /* Reset default border */
+  height: 75vh; /* Viewport-relative units */
+  width: 75vw;
+}
