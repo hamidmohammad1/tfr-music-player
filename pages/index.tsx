@@ -44,11 +44,9 @@ function Home() {
   const [gifs, setGifs] = useState<string[]>([])
   const [soundAccepted, setSoundAccepted] = useState(false)
   const [windowWidth, setWindowWidth] = useState(0)
-  const [windowHeight, setWindowHeight] = useState(0)
 
   const handleWindowResize = () => {
     setWindowWidth(window.innerWidth)
-    setWindowHeight(window.innerHeight)
   }
 
   function setDurationInterval() {
@@ -115,7 +113,6 @@ function Home() {
         ;(window as any).responsiveVoice.speak(text, 'Danish Female')
       }
 
-      //window.speechSynthesis.speak(new SpeechSynthesisUtterance(text))
       setPlay(false)
       setText('')
       setGifId(1)
@@ -148,33 +145,23 @@ function Home() {
   return (
     <div className='h-screen overflow-hidden w-screen flex flex-row justify-center bg-[#286464]'>
       <div className='h-full flex flex-col justify-center'>
-        {play ? (
-          <div>
-            <div className='flex flex-row justify-center text-center text-6xl text-gray-100 mb-10 px-4'>
-              {text}
-            </div>
-            <div className='flex flex-row justify-center'>
-              <iframe src={gifs[gifId]} width={windowWidth * 80} />
-            </div>
+        <div className={play ? '' : 'invisible h-0'}>
+          <div className='flex flex-row justify-center text-center text-6xl text-gray-100 mb-10 px-4'>
+            {text}
           </div>
-        ) : (
-          <div className='text-gray-100'>
-            <div className='text-9xl pb-8 text-center'>Wait for it ...</div>
-
-            <div className='text-4xl'>
-              Tid siden sidste approve: {durationInSecToTime(duration)}
-            </div>
+          <div className='flex flex-row justify-center'>
+            <iframe src={gifs[gifId]} width={windowWidth * 80} />
           </div>
-        )}
+        </div>
+        <div className={play ? 'invisible h-0' : 'text-gray-100'}>
+          <div className='text-9xl pb-8 text-center'>Wait for it ...</div>
+          <div className='text-4xl text-center'>
+            Tid siden sidste approve: {durationInSecToTime(duration)}
+          </div>
+        </div>
       </div>
     </div>
   )
 }
 
 export default Home
-
-/*return {
-    unixTime: Math.round(Date.now() / 1000),
-    text: 'HYM has approved PROPHET PK CONSTANT!',
-    initials: 'HYM',
-  }*/
