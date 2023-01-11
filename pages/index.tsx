@@ -20,12 +20,6 @@ async function getEvent(): Promise<Event> {
   const event = await res.json()
   console.log('Response:', event)
   return event
-
-  /*return {
-    unixTime: Math.round(Date.now() / 1000),
-    text: 'HYM has approved PROPHET PK CONSTANT!',
-    initials: 'HYM',
-  }*/
 }
 
 async function getGifs(): Promise<string[]> {
@@ -117,7 +111,11 @@ function Home() {
 
   if (play && soundAccepted) {
     audio.onended = function () {
-      window.speechSynthesis.speak(new SpeechSynthesisUtterance(text))
+      if (typeof window !== 'undefined') {
+        ;(window as any).responsiveVoice.speak(text, 'Danish Female')
+      }
+
+      //window.speechSynthesis.speak(new SpeechSynthesisUtterance(text))
       setPlay(false)
       setText('')
       setGifId(1)
@@ -135,6 +133,9 @@ function Home() {
             className='text-5xl text-white bg-yellow-600 p-6 rounded-lg'
             onClick={() => {
               setSoundAccepted(true)
+              if (typeof window !== 'undefined') {
+                ;(window as any).responsiveVoice.clickEvent()
+              }
             }}
           >
             Acccepter lyd
@@ -171,3 +172,9 @@ function Home() {
 }
 
 export default Home
+
+/*return {
+    unixTime: Math.round(Date.now() / 1000),
+    text: 'HYM has approved PROPHET PK CONSTANT!',
+    initials: 'HYM',
+  }*/
