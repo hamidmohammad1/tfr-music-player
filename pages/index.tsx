@@ -13,8 +13,12 @@ const subUrl =
 const subUrlMp3 = 'https://github.com/hamidmohammad1/tfr-music-store/blob/main/'
 
 async function getEvent(): Promise<Event> {
-  const res = await fetch(backendUrl, { cache: 'no-store' })
+  const res = await fetch(backendUrl, {
+    method: 'GET',
+    cache: 'no-store',
+  })
   const event = await res.json()
+  console.log('Response:', event)
   return event
 
   /*return {
@@ -34,8 +38,8 @@ async function getGifs(): Promise<string[]> {
 
 function Home() {
   const SEC_TO_MS = 1000
-  const MIN_TO_SEC = 60
-  const FETCH_TIME_IN_MIN = 1
+  const FETCH_TIME = 60 * SEC_TO_MS
+  const ACCEPT_TIME = 90 * SEC_TO_MS
 
   const [isRendered, setIsRendered] = useState(false)
   const [duration, setDuration] = useState(86400)
@@ -59,16 +63,17 @@ function Home() {
 
   async function fetchDatabaseInterval() {
     const unixTimeNow = Date.now()
-    console.log('Checker nu!: ', Math.round(unixTimeNow / 1000))
+    console.log('Checker nu!: ', Math.round(unixTimeNow / SEC_TO_MS))
 
     const event = await getEvent()
-    console.log(event)
-    setDuration(Math.round((unixTimeNow - event.unixTime * SEC_TO_MS) / 1000))
+    setDuration(Math.round(unixTimeNow / SEC_TO_MS - event.unixTime))
 
-    if (
-      (event.unixTime + FETCH_TIME_IN_MIN * MIN_TO_SEC) * SEC_TO_MS <
-      unixTimeNow
-    ) {
+    console.log(
+      'DURATION:',
+      Math.round(unixTimeNow / SEC_TO_MS - event.unixTime)
+    )
+
+    if (event.unixTime * SEC_TO_MS + ACCEPT_TIME < unixTimeNow) {
       return
     }
 
@@ -97,7 +102,7 @@ function Home() {
 
     const fetchDatabaseIntervalId = setInterval(
       fetchDatabaseInterval,
-      FETCH_TIME_IN_MIN * MIN_TO_SEC * SEC_TO_MS
+      FETCH_TIME
     )
 
     handleWindowResize()
