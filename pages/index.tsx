@@ -7,14 +7,21 @@ type Event = {
   initials: string
 }
 
+const backendUrl = 'https://tfr-music-backend.fly.dev/get'
 const subUrl =
   'https://raw.githubusercontent.com/hamidmohammad1/tfr-music-store/main/'
 const subUrlMp3 = 'https://github.com/hamidmohammad1/tfr-music-store/blob/main/'
 
-async function getDatabase(): Promise<Event> {
-  const res = await fetch(subUrl + 'database.json', { cache: 'no-store' })
+async function getEvent(): Promise<Event> {
+  const res = await fetch(backendUrl, { cache: 'no-store' })
   const event = await res.json()
   return event
+
+  /*return {
+    unixTime: Math.round(Date.now() / 1000),
+    text: 'HYM has approved PROPHET PK CONSTANT!',
+    initials: 'HYM',
+  }*/
 }
 
 async function getGifs(): Promise<string[]> {
@@ -28,7 +35,7 @@ async function getGifs(): Promise<string[]> {
 function Home() {
   const SEC_TO_MS = 1000
   const MIN_TO_SEC = 60
-  const FETCH_TIME_IN_MIN = 5
+  const FETCH_TIME_IN_MIN = 1
 
   const [isRendered, setIsRendered] = useState(false)
   const [duration, setDuration] = useState(86400)
@@ -38,6 +45,13 @@ function Home() {
   const [play, setPlay] = useState(false)
   const [gifs, setGifs] = useState<string[]>([])
   const [soundAccepted, setSoundAccepted] = useState(false)
+  const [windowWidth, setWindowWidth] = useState(0)
+  const [windowHeight, setWindowHeight] = useState(0)
+
+  const handleWindowResize = () => {
+    setWindowWidth(window.innerWidth)
+    setWindowHeight(window.innerHeight)
+  }
 
   function setDurationInterval() {
     setDuration((oldCount) => oldCount + 1)
@@ -47,7 +61,7 @@ function Home() {
     const unixTimeNow = Date.now()
     console.log('Checker nu!: ', Math.round(unixTimeNow / 1000))
 
-    const event = await getDatabase()
+    const event = await getEvent()
     console.log(event)
     setDuration(Math.round((unixTimeNow - event.unixTime * SEC_TO_MS) / 1000))
 
@@ -61,9 +75,7 @@ function Home() {
     const initialsAudio = subUrlMp3 + event.initials + '.mp3?raw=true'
     const defaultAudio = subUrlMp3 + 'Default' + '.mp3?raw=true'
     const urlMusic = true ? initialsAudio : defaultAudio
-
     const audio = new Audio(urlMusic)
-    //audio.crossOrigin = 'anonymous'
 
     setAudio(audio)
     setText(event.text)
@@ -88,9 +100,13 @@ function Home() {
       FETCH_TIME_IN_MIN * MIN_TO_SEC * SEC_TO_MS
     )
 
+    handleWindowResize()
+    window.addEventListener('resize', handleWindowResize)
+
     return () => {
       clearInterval(setDurationIntervalId)
       clearInterval(fetchDatabaseIntervalId)
+      window.removeEventListener('resize', handleWindowResize)
     }
   }, [soundAccepted])
 
@@ -124,19 +140,16 @@ function Home() {
   }
 
   return (
-    <div className='h-[100vh] w-[100vw] flex flex-row justify-center bg-[#286464]'>
+    <div className='h-screen overflow-hidden w-screen flex flex-row justify-center bg-[#286464]'>
       <div className='h-full flex flex-col justify-center'>
         {play ? (
           <div>
-            <div className='flex flex-row justify-center text-6xl text-gray-100 mb-10'>
+            <div className='flex flex-row justify-center text-center text-6xl text-gray-100 mb-10 px-4'>
               {text}
             </div>
-            <iframe
-              src={gifs[gifId]}
-              width='100%'
-              height='100%'
-              allowFullScreen
-            />
+            <div className='flex flex-row justify-center'>
+              <iframe src={gifs[gifId]} width={windowWidth * 80} />
+            </div>
           </div>
         ) : (
           <div className='text-gray-100'>
