@@ -7,23 +7,21 @@ type Event = {
   initials: string
 }
 
-const backendUrl = 'https://tfr-music-backend.fly.dev/get'
-const subUrl =
-  'https://raw.githubusercontent.com/hamidmohammad1/tfr-music-store/main/'
-const subUrlMp3 = 'https://github.com/hamidmohammad1/tfr-music-store/blob/main/'
-
 async function getEvent(): Promise<Event> {
-  const res = await fetch(backendUrl, {
-    method: 'GET',
-    cache: 'no-store',
-  })
+  const res = await fetch('/assets/lastestApprove.json', { cache: 'no-store' })
+
   const event = await res.json()
+  /*const event =  {
+    unixTime: Math.round(new Date().getTime() / 1000),
+    text: 'Hello',
+    initials: 'HYM',
+  }*/
   console.log('Response:', event)
   return event
 }
 
 async function getGifs(): Promise<string[]> {
-  const res = await fetch(subUrl + 'gifs.json', { cache: 'no-store' })
+  const res = await fetch('/assets/gifs.json', { cache: 'no-store' })
   const gifs = await res.json()
 
   console.log('Hentede gifs: ', gifs.gifs)
@@ -69,8 +67,8 @@ function Home() {
       return
     }
 
-    const initialsAudio = subUrlMp3 + event.initials + '.mp3?raw=true'
-    const defaultAudio = subUrlMp3 + 'Default' + '.mp3?raw=true'
+    const initialsAudio = '/assets/' + event.initials + '.mp3'
+    const defaultAudio = '/assets/' + 'Default' + '.mp3'
     const urlMusic = true ? initialsAudio : defaultAudio
     const audio = new Audio(urlMusic)
 
