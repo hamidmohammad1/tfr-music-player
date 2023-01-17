@@ -8,7 +8,7 @@ type Event = {
 }
 
 async function getEvent(): Promise<Event> {
-  const res = await fetch('/assets/lastestApprove.json', { cache: 'no-store' })
+  const res = await fetch('/assets/approve.json', { cache: 'no-store' })
 
   const event = await res.json()
   /*const event =  {
