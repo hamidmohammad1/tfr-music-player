@@ -6,42 +6,42 @@ type Event = {
   text: string
   initials: string
 }
-
-async function getEvent(): Promise<Event> {
-  const res = await fetch('/assets/approve.json', { cache: 'no-store' })
-
-  const event = await res.json()
-  /*const event =  {
+/*const event =  {
     unixTime: Math.round(new Date().getTime() / 1000),
     text: 'Hello',
     initials: 'HYM',
   }*/
-  console.log('Response:', event)
+
+async function getEvent(): Promise<Event> {
+  const res = await fetch('/assets/approve.json', { cache: 'no-store' })
+  const event = await res.json()
   return event
 }
 
 async function getGifs(): Promise<string[]> {
   const res = await fetch('/assets/gifs.json', { cache: 'no-store' })
   const gifs = await res.json()
-
   console.log('Hentede gifs: ', gifs.gifs)
   return gifs.gifs
 }
 
 function Home() {
+  const DEFAULT_INDEX = 'Default'
   const SEC_TO_MS = 1000
-  const FETCH_TIME = 60 * SEC_TO_MS
-  const ACCEPT_TIME = 90 * SEC_TO_MS
+  const FETCH_TIME = 10 * SEC_TO_MS
+  const ACCEPT_TIME_SEC = 15
+  let blocked = false
 
-  const [isRendered, setIsRendered] = useState(false)
   const [duration, setDuration] = useState(86400)
   const [text, setText] = useState('')
-  const [gifId, setGifId] = useState(1)
+  const [gifId, setGifId] = useState(DEFAULT_INDEX)
   const [audio, setAudio] = useState<any>(null)
   const [play, setPlay] = useState(false)
-  const [gifs, setGifs] = useState<string[]>([])
   const [soundAccepted, setSoundAccepted] = useState(false)
   const [windowWidth, setWindowWidth] = useState(0)
+  const [gifs, setGifs] = useState<any>({
+    Default: 'https://giphy.com/embed/blSTtZehjAZ8I',
+  })
 
   const handleWindowResize = () => {
     setWindowWidth(window.innerWidth)
@@ -53,37 +53,47 @@ function Home() {
 
   async function fetchDatabaseInterval() {
     const unixTimeNow = Date.now()
-    console.log('Checker nu!: ', Math.round(unixTimeNow / SEC_TO_MS))
 
     const event = await getEvent()
-    setDuration(Math.round(unixTimeNow / SEC_TO_MS - event.unixTime))
+    const secEvent = event.unixTime
+    const secNow = Math.round(unixTimeNow / SEC_TO_MS)
+    setDuration(secNow - secEvent)
 
-    console.log(
-      'DURATION:',
-      Math.round(unixTimeNow / SEC_TO_MS - event.unixTime)
-    )
-
-    if (event.unixTime * SEC_TO_MS + ACCEPT_TIME < unixTimeNow) {
+    if (
+      blocked ||
+      secNow + 2 < secEvent ||
+      secNow - secEvent > ACCEPT_TIME_SEC
+    ) {
       return
     }
+    console.log('Nu    tid:', secNow)
+    console.log('Event tid:', event.unixTime)
 
+    blocked = true
     const initialsAudio = '/assets/' + event.initials + '.mp3'
-    const defaultAudio = '/assets/' + 'Default' + '.mp3'
+    const defaultAudio = '/assets/' + DEFAULT_INDEX + '.mp3'
     const urlMusic = true ? initialsAudio : defaultAudio
     const audio = new Audio(urlMusic)
+    const gifIndex = event.initials in gifs ? event.initials : DEFAULT_INDEX
 
     setAudio(audio)
     setText(event.text)
-    setGifId(Math.floor(Math.random() * gifs.length))
+    setGifId(gifIndex)
     setPlay(true)
+
+    setTimeout(function () {
+      blocked = false
+    }, (ACCEPT_TIME_SEC + 1) * SEC_TO_MS)
   }
 
   useEffect(() => {
-    if (!isRendered) {
-      setIsRendered(true)
-      fetchDatabaseInterval() // Initial Check
-      getGifs().then((res) => setGifs(res))
-    }
+    getGifs().then((res) => setGifs(res))
+    getEvent().then((res) => {
+      const unixTimeNow = Date.now()
+      const secEvent = res.unixTime
+      const secNow = Math.round(unixTimeNow / SEC_TO_MS)
+      setDuration(secNow - secEvent)
+    })
 
     const setDurationIntervalId = setInterval(
       setDurationInterval,
@@ -113,7 +123,7 @@ function Home() {
 
       setPlay(false)
       setText('')
-      setGifId(1)
+      setGifId(DEFAULT_INDEX)
       setAudio(null)
     }
 
